@@ -1,0 +1,62 @@
+from tkinter import *
+import math
+
+WORK_MIN = 1
+SHORT_BREAK_MIN = 1
+LONG_BREAK_MIN = 1
+
+reps = 0
+timer = None
+
+def reset_timer():
+    global reps, timer
+    if timer:
+        window.after_cancel(timer)
+    reps = 0
+    canvas.itemconfig(timer_text, text="00:00")
+    title_label.config(text="Timer")
+    check_marks.config(text="")
+
+def start_timer():
+    global reps
+    reps += 1
+    if reps % 8 == 0:
+        title_label.config(text="Break")
+        count_down(LONG_BREAK_MIN * 60)
+    elif reps % 2 == 0:
+        title_label.config(text="Break")
+        count_down(SHORT_BREAK_MIN * 60)
+    else:
+        title_label.config(text="Work")
+        count_down(WORK_MIN * 60)
+
+def count_down(count):
+    global timer
+    min = count // 60
+    sec = count % 60
+    canvas.itemconfig(timer_text, text=f"{min:02d}:{sec:02d}")
+    if count > 0:
+        timer = window.after(1000, count_down, count - 1)
+    else:
+        start_timer()
+        check_marks.config(text="✔" * (reps // 2))
+
+window = Tk()
+window.title("Pomodoro Timer")
+window.config(padx=50, pady=30)
+
+title_label = Label(text="Timer", font=("Courier", 30))
+title_label.pack()
+
+canvas = Canvas(window, width=200, height=200)
+canvas.create_oval(30, 30, 170, 170)
+timer_text = canvas.create_text(100, 100, text="00:00", font=("Courier", 28, "bold"))
+canvas.pack()
+
+Button(window, text="Start", command=start_timer).pack()
+Button(window, text="Reset", command=reset_timer).pack()
+
+check_marks = Label(window, font=("Courier", 15))
+check_marks.pack()
+
+window.mainloop()
